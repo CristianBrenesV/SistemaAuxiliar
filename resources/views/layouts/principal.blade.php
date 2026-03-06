@@ -35,7 +35,7 @@
 
                 <ul class="nav flex-column">
                     <li class="nav-item mt-3"><span class="text-white h6">Usuarios</span></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-people-fill"></i> Gestión Usuarios</a></li>
+                    <a class="nav-link text-white" href="{{ route('usuarios.index') }}"><i class="bi bi-people-fill"></i> Gestión Usuarios</a>
 
                     <li class="nav-item mt-3"><span class="text-white h6">Centros de Costo</span></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-grid"></i> Gestión Centros de Costo</a></li>

@@ -11,7 +11,7 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        // Key AES-256 de 32 caracteres exactos
+        // Key AES-256 exacta
         $this->key = substr('dsCNm5YzHL9xV8wPR1aXbKfT2oG3jQ7k', 0, 32);
     }
 
@@ -32,18 +32,14 @@ class AuthController extends Controller
     private function obtenerUsuario(string $usuario): ?object
     {
         $result = DB::select('CALL sp_VerificarCredencial(?)', [$usuario]);
-
         return !empty($result) ? $result[0] : null;
     }
 
     private function registrarIntentoFallido(string $usuario): int
     {
         DB::statement('SET @resultado = 0');
-
         DB::statement('CALL sp_RegistrarIntentoFallido(?, @resultado)', [$usuario]);
-
         $result = DB::select('SELECT @resultado as resultado');
-
         return $result[0]->resultado ?? 0;
     }
 
@@ -54,6 +50,11 @@ class AuthController extends Controller
 
     public function showLogin()
     {
+        // Si ya hay sesión activa, redirige al principal
+        if (session()->has('user_id')) {
+            return redirect('/principal');
+        }
+
         return view('auth.login');
     }
 
@@ -71,6 +72,7 @@ class AuthController extends Controller
             if ($this->verificarClaveAESGCM($request->password, $user->ClaveCifrada, $user->TagAutenticacion, $user->Nonce)) {
                 $this->reiniciarIntentos($usuario);
 
+                // Guardamos sesión
                 session([
                     'user_id' => $user->IdUsuario,
                     'user_name' => $user->NombreUsuario . ' ' . $user->ApellidoUsuario,
