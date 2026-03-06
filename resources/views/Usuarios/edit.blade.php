@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.principal')
 
 @section('title', 'Editar Usuario')
 
@@ -23,43 +23,43 @@
     <div class="card shadow-sm border-0 w-50" style="background-color: #d9d9d9;">
         <div class="card-body">
 
-            <form id="formEditarUsuario" action="{{ route('usuarios.update', $usuario->id) }}" method="POST" onsubmit="return validarClave()">
+             <form id="formEditarUsuario" action="{{ route('usuarios.actualizar', $usuario->IdUsuario) }}" method="POST" onsubmit="return validarClave()">
                 @csrf
                 @method('PUT')
 
                 <div class="mb-3">
                     <label for="id_usuario" class="form-label"><strong>ID Usuario</strong></label>
-                    <input type="text" name="id_usuario" id="id_usuario" class="form-control" value="{{ $usuario->id }}" readonly>
+                    <input type="text" name="id_usuario" id="id_usuario" class="form-control" value="{{ $usuario->IdUsuario }}" readonly>
                 </div>
 
                 <div class="mb-3">
-                    <label for="username" class="form-label"><strong>Usuario</strong></label>
-                    <input type="text" name="username" id="username" class="form-control" value="{{ old('username', $usuario->username) }}">
-                    @error('username')
+                    <label for="usuario" class="form-label"><strong>Usuario</strong></label>
+                    <input type="text" name="usuario" id="usuario" class="form-control" value="{{ old('usuario', $usuario->Usuario) }}">
+                    @error('usuario')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label for="nombre" class="form-label"><strong>Nombre</strong></label>
-                    <input type="text" name="nombre" id="nombre" class="form-control" value="{{ old('nombre', $usuario->nombre) }}">
-                    @error('nombre')
+                    <label for="nombre_usuario" class="form-label"><strong>Nombre</strong></label>
+                    <input type="text" name="nombre_usuario" id="nombre_usuario" class="form-control" value="{{ old('nombre_usuario', $usuario->NombreUsuario) }}">
+                    @error('nombre_usuario')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label for="apellido" class="form-label"><strong>Apellido</strong></label>
-                    <input type="text" name="apellido" id="apellido" class="form-control" value="{{ old('apellido', $usuario->apellido) }}">
-                    @error('apellido')
+                    <label for="apellido_usuario" class="form-label"><strong>Apellido</strong></label>
+                    <input type="text" name="apellido_usuario" id="apellido_usuario" class="form-control" value="{{ old('apellido_usuario', $usuario->ApellidoUsuario) }}">
+                    @error('apellido_usuario')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="mb-3">
-                    <label for="email" class="form-label"><strong>Correo Electrónico</strong></label>
-                    <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $usuario->email) }}">
-                    @error('email')
+                    <label for="correo_electronico" class="form-label"><strong>Correo Electrónico</strong></label>
+                    <input type="email" name="correo_electronico" id="correo_electronico" class="form-control" value="{{ old('correo_electronico', $usuario->CorreoElectronico) }}">
+                    @error('correo_electronico')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
@@ -90,30 +90,14 @@
                     <span class="text-danger" id="errorConfirmacion"></span>
                 </div>
 
-                <!-- ROLES -->
-                <div class="mb-3">
-                    <label class="form-label"><strong>Roles Asociados</strong></label>
-                    <select name="roles[]" class="form-select" multiple>
-                        @foreach($roles as $rol)
-                            <option value="{{ $rol->id }}"
-                                {{ in_array($rol->id, old('roles', $usuario->roles->pluck('id')->toArray())) ? 'selected' : '' }}>
-                                {{ $rol->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('roles')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
-
                 <!-- ESTADO -->
                 <div class="mb-3">
                     <label for="estado" class="form-label"><strong>Estado</strong></label>
                     <select name="estado" id="estado" class="form-select">
                         <option value="">-- Seleccione estado --</option>
-                        <option value="Activo" {{ old('estado', $usuario->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
-                        <option value="Inactivo" {{ old('estado', $usuario->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
-                        <option value="Bloqueado" {{ old('estado', $usuario->estado) == 'Bloqueado' ? 'selected' : '' }}>Bloqueado</option>
+                        <option value="Activo" {{ old('estado', $usuario->Estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
+                        <option value="Inactivo" {{ old('estado', $usuario->Estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
+                        <option value="Bloqueado" {{ old('estado', $usuario->Estado) == 'Bloqueado' ? 'selected' : '' }}>Bloqueado</option>
                     </select>
                     @error('estado')
                         <span class="text-danger">{{ $message }}</span>

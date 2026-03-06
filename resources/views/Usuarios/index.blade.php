@@ -35,14 +35,22 @@
                     <td style="white-space: nowrap;">{{ $user->CorreoElectronico }}</td>
 
                     <td>
-                        <form method="POST" action="{{ route('usuarios.cambiarEstado', $user->IdUsuario) }}" class="d-inline">
+                        <form method="POST" action="{{ route('usuarios.cambiarEstado') }}" class="d-inline">
                             @csrf
-                            <select name="nuevo_estado" class="form-select form-select-sm" onchange="this.form.submit()">
+
+                            <input type="hidden" name="IdUsuario" value="{{ $user->IdUsuario }}">
+
+                            <select name="nuevo_estado"
+                                    class="form-select form-select-sm"
+                                    onchange="this.form.submit()">
+
                                 @foreach (\App\Enums\EstadoUsuario::cases() as $Estado)
-                                    <option value="{{ $Estado->value }}" {{ $Estado->value === $user->Estado ? 'selected' : '' }}>
+                                    <option value="{{ $Estado->value }}"
+                                        {{ $Estado->value === $user->Estado ? 'selected' : '' }}>
                                         {{ $Estado->name }}
                                     </option>
                                 @endforeach
+
                             </select>
                         </form>
                     </td>
@@ -90,7 +98,7 @@
 
 {{-- Paginación --}}
 <nav aria-label="Paginación de usuarios" class="mt-4">
-    {{ $usuarios->links() }}
+    {{ $usuarios->links('pagination::bootstrap-5') }}
 </nav>
 
 {{-- Mensajes --}}
@@ -126,24 +134,20 @@
 @endsection
 
 @section('scripts')
-<script>
-    const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+    <script>
+        var modalEliminar = document.getElementById('modalEliminar');
+        modalEliminar.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-id');
+            var userName = button.getAttribute('data-nombre');
 
-    botonesEliminar.forEach(button => {
-        button.addEventListener('click', () => {
-            const idUsuario = button.getAttribute('data-id');
-            const nombreUsuario = button.getAttribute('data-nombre');
+            // Actualizar nombre en el modal
+            modalEliminar.querySelector('#nombreUsuario').textContent = userName;
 
-            document.getElementById('nombreUsuario').textContent = nombreUsuario;
-
-            // Reemplazamos el placeholder :ID con el ID real
-            const form = document.getElementById('formEliminar');
-            form.action = form.action.replace(':ID', idUsuario);
-
-            // Abrimos el modal usando Bootstrap 5
-            const modal = new bootstrap.Modal(document.getElementById('modalEliminar'));
-            modal.show();
+            // Actualizar acción del formulario
+            var form = modalEliminar.querySelector('#formEliminar');
+            var action = form.getAttribute('action').replace(':ID', userId);
+            form.setAttribute('action', action);
         });
-    });
-</script>
+    </script>
 @endsection

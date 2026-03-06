@@ -21,8 +21,8 @@ Route::middleware('web')->group(function () {
     Route::get('/usuarios/crear', [UserController::class, 'crear'])->name('usuarios.crear');
     Route::post('/usuarios/guardar', [UserController::class, 'guardar'])->name('usuarios.guardar');
     Route::get('/usuarios/editar/{id}', [UserController::class, 'editar'])->name('usuarios.editar');
-    Route::post('/usuarios/actualizar/{id}', [UserController::class, 'actualizar'])->name('usuarios.actualizar');
-    Route::post('/usuarios/eliminar/{id}', [UserController::class, 'eliminar'])->name('usuarios.eliminar');
+    Route::put('/usuarios/actualizar/{id}', [UserController::class, 'actualizar'])->name('usuarios.actualizar');
+    Route::delete('/usuarios/eliminar/{id}', [UserController::class, 'eliminar'])->name('usuarios.eliminar');
     Route::post('/usuarios/cambiar-estado', [UserController::class, 'cambiarEstadoUsuario'])->name('usuarios.cambiarEstado');
     Route::post('/usuarios/cambiar-clave', [UserController::class, 'cambiarClaveUsuario'])->name('usuarios.cambiarClave');
 });

@@ -59,12 +59,13 @@ class UserController extends Controller
             'clave' => 'required'
         ]);
 
-        // Cifrar clave como en AuthController
+        // Cifrar clave
         $key = substr('dsCNm5YzHL9xV8wPR1aXbKfT2oG3jQ7k', 0, 32);
         $nonce = random_bytes(12);
         $tag = '';
         $claveCifrada = openssl_encrypt($request->clave, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $nonce, $tag);
 
+        // Llamar SP
         DB::statement('CALL sp_UsuariosInsertar(?, ?, ?, ?, ?, ?, ?, ?, @resultado, @idUsuario)', [
             $request->usuario,
             $claveCifrada,
@@ -76,7 +77,7 @@ class UserController extends Controller
             $request->estado ?? 'Activo'
         ]);
 
-        return redirect()->route('usuarios.index')->with('mensaje', 'Usuario creado');
+        return redirect()->route('usuarios.index')->with('mensaje', 'Usuario creado correctamente');
     }
 
     // Mostrar formulario de edición
@@ -86,7 +87,7 @@ class UserController extends Controller
         if (empty($usuario)) return redirect()->route('usuarios.index');
 
         $roles = DB::select('CALL sp_RolesListar()');
-        return view('usuarios.editar', [
+        return view('usuarios.edit', [
             'usuario' => $usuario[0],
             'roles' => $roles
         ]);
@@ -104,7 +105,9 @@ class UserController extends Controller
         ]);
 
         DB::statement('SET @resultado = 0;');
-        DB::statement('CALL sp_UsuariosActualizarPorIdUsuario(?,?,?,?,?,?,@resultado)', [
+        DB::statement('SET @idUsuario = 0;');
+
+        DB::statement('CALL sp_UsuariosActualizarPorIdUsuario(?,?,?,?,?,?,@resultado,@idUsuario)', [
             $id,
             $request->usuario,
             $request->nombre_usuario,
@@ -116,7 +119,8 @@ class UserController extends Controller
         $resultado = DB::select('SELECT @resultado as resultado')[0];
 
         if ($resultado->resultado == 1) {
-            return redirect()->route('usuarios.index')->with('mensaje', 'Usuario actualizado correctamente');
+            return redirect()->route('usuarios.index')
+                ->with('mensaje', 'Usuario actualizado correctamente');
         }
 
         return back()->with('error', 'Error al actualizar usuario');
@@ -126,7 +130,7 @@ class UserController extends Controller
     public function eliminar($id)
     {
         DB::statement('SET @resultado = 0;');
-        DB::statement('CALL sp_EliminarUsuarioPorId(?)', [$id]);
+        DB::statement('CALL sp_UsuariosEliminarPorIdUsuario(?, @resultado)', [$id]);
         $resultado = DB::select('SELECT @resultado as resultado')[0];
 
         if ($resultado->resultado == 1) {
@@ -139,10 +143,15 @@ class UserController extends Controller
     // Cambiar estado de usuario
     public function cambiarEstadoUsuario(Request $request)
     {
-        $id = $request->id_usuario;
-        $nuevoEstado = $request->nuevo_estado;
+        $request->validate([
+            'IdUsuario' => 'required|integer',
+            'nuevo_estado' => 'required|in:Activo,Inactivo,Bloqueado'
+        ]);
 
-        DB::statement('CALL sp_CambiarEstadoUsuario(?, ?)', [$id, $nuevoEstado]);
+        DB::statement('CALL sp_CambiarEstadoUsuario(?, ?)', [
+            $request->IdUsuario,
+            $request->nuevo_estado
+        ]);
 
         return back()->with('mensaje', 'Estado actualizado');
     }
@@ -150,7 +159,7 @@ class UserController extends Controller
     // Cambiar clave de usuario
     public function cambiarClaveUsuario(Request $request)
     {
-        $id = $request->id_usuario;
+        $id = $request->IdUsuario;
         $clave = $request->clave;
 
         $key = substr('dsCNm5YzHL9xV8wPR1aXbKfT2oG3jQ7k', 0, 32);
