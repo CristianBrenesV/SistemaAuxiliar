@@ -6,29 +6,32 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use App\Services\BitacoraService;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
+    protected BitacoraService $bitacora;
 
+    public function __construct(BitacoraService $bitacora)
+    {
+        $this->bitacora = $bitacora;
     }
 
     // Listar usuarios
     public function index(Request $request)
     {
-        $perPage = 10; // número de usuarios por página
+        $perPage = 10;
         $page = $request->get('page', 1);
         $offset = ($page - 1) * $perPage;
 
-        // Llamamos a tu SP con límite y offset
+        // SP paginado: trae solo los registros del límite
         $usuariosArray = DB::select('CALL sp_UsuariosListar10(?, ?)', [$perPage, $offset]);
 
-        // Contar total de registros (puedes usar otro SP que haga COUNT(*))
-        $total = DB::select('SELECT COUNT(*) as total FROM usuarios')[0]->total;
+        // SP de conteo: devuelve total de usuarios
+        $total = DB::select('CALL sp_UsuariosConteo()')[0]->Total;
 
         // Crear el paginador
-        $usuarios = new LengthAwarePaginator(
+        $usuarios = new \Illuminate\Pagination\LengthAwarePaginator(
             $usuariosArray,
             $total,
             $perPage,
@@ -59,13 +62,11 @@ class UserController extends Controller
             'clave' => 'required'
         ]);
 
-        // Cifrar clave
         $key = substr('dsCNm5YzHL9xV8wPR1aXbKfT2oG3jQ7k', 0, 32);
         $nonce = random_bytes(12);
         $tag = '';
         $claveCifrada = openssl_encrypt($request->clave, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $nonce, $tag);
 
-        // Llamar SP
         DB::statement('CALL sp_UsuariosInsertar(?, ?, ?, ?, ?, ?, ?, ?, @resultado, @idUsuario)', [
             $request->usuario,
             $claveCifrada,
@@ -75,6 +76,12 @@ class UserController extends Controller
             $tag,
             $nonce,
             $request->estado ?? 'Activo'
+        ]);
+
+        // Registrar bitácora
+        $this->bitacora->registrar('Creación de usuario', [
+            'usuario' => $request->usuario,
+            'correo' => $request->correo_electronico
         ]);
 
         return redirect()->route('usuarios.index')->with('mensaje', 'Usuario creado correctamente');
@@ -119,6 +126,12 @@ class UserController extends Controller
         $resultado = DB::select('SELECT @resultado as resultado')[0];
 
         if ($resultado->resultado == 1) {
+            $this->bitacora->registrar('Actualización de usuario', [
+                'idUsuario' => $id,
+                'usuario' => $request->usuario,
+                'estado' => $request->estado
+            ]);
+
             return redirect()->route('usuarios.index')
                 ->with('mensaje', 'Usuario actualizado correctamente');
         }
@@ -134,6 +147,7 @@ class UserController extends Controller
         $resultado = DB::select('SELECT @resultado as resultado')[0];
 
         if ($resultado->resultado == 1) {
+            $this->bitacora->registrar('Eliminación de usuario', ['idUsuario' => $id]);
             return redirect()->route('usuarios.index')->with('mensaje', 'Usuario eliminado correctamente');
         }
 
@@ -153,6 +167,11 @@ class UserController extends Controller
             $request->nuevo_estado
         ]);
 
+        $this->bitacora->registrar('Cambio de estado de usuario', [
+            'idUsuario' => $request->IdUsuario,
+            'nuevo_estado' => $request->nuevo_estado
+        ]);
+
         return back()->with('mensaje', 'Estado actualizado');
     }
 
@@ -168,6 +187,8 @@ class UserController extends Controller
         $claveCifrada = openssl_encrypt($clave, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $nonce, $tag);
 
         DB::statement('CALL sp_CambiarClaveUsuario(?, ?, ?, ?)', [$id, $claveCifrada, $tag, $nonce]);
+
+        $this->bitacora->registrar('Cambio de clave de usuario', ['idUsuario' => $id]);
 
         return back()->with('mensaje', 'Clave actualizada');
     }

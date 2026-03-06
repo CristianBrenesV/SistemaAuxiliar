@@ -29,5 +29,5 @@ Route::middleware('web')->group(function () {
 
 // ================= PÁGINA INICIAL =================
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
