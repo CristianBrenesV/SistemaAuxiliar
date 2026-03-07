@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    <!-- Token CSRF necesario para AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         body { overflow-x: hidden; }
         .sidebar { min-height: 100vh; }
@@ -35,7 +37,7 @@
 
                 <ul class="nav flex-column">
                     <li class="nav-item mt-3"><span class="text-white h6">Usuarios</span></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-people-fill"></i> Gestión Usuarios</a></li>
+                    <a class="nav-link text-white" href="{{ route('usuarios.index') }}"><i class="bi bi-people-fill"></i> Gestión Usuarios</a>
 
                     <li class="nav-item mt-3"><span class="text-white h6">Centros de Costo</span></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-grid"></i> Gestión Centros de Costo</a></li>
@@ -53,22 +55,32 @@
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text"></i> Centros de Costo</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text"></i> Terceros</a></li>
 
-                    <li class="nav-item mt-4">
-                        <form method="POST" action="{{ url('/logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-outline-light w-100 text-start">
-                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                            </button>
-                        </form>
-                    </li>
                 </ul>
             </nav>
 
             <!-- Main -->
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
                 <div class="topbar bg-dark d-flex justify-content-end align-items-center mb-3">
-                    <span class="me-2">{{ session('user_name', 'Invitado') }}</span>
-                    <img src="/images/avatar_generico.jpg" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;" />
+                    <!-- Nombre del usuario -->
+                    <span class="me-2 text-white">{{ session('user_name', 'Invitado') }}</span>
+
+                    <!-- Avatar como dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="avatarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/images/avatar_generico.jpg" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px;" />
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="avatarDropdown">
+                            <li class="px-1 py-2">
+                                <form method="POST" action="{{ url('/logout') }}" class="d-inline w-100">
+                                    @csrf
+                                    <button type="submit" class="btn btn-dark w-100 d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 @yield('content')
@@ -96,5 +108,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/inactividad.js') }}"></script>
     @yield('scripts')
+
 </body>
 </html>
