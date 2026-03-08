@@ -13,6 +13,7 @@ class AsientoDetalleTercero extends Model {
         'IdAsientoDetalle',
         'IdTercero',
         'Monto',
-        'Porcentaje'
+        'Porcentaje',
+        'Nota'
     ];
 }

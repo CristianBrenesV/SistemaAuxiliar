@@ -12,7 +12,6 @@
     {{-- Info del Asiento --}}
     <div class="card bg-dark text-white border-secondary mb-4 shadow">
         <div class="card-header border-secondary bg-dark d-flex justify-content-between">
-            {{-- Cambiado de $asiento a $detalle->asiento --}}
             <span><i class="bi bi-info-circle me-1"></i> Asiento: <strong>{{ $detalle->asiento->Consecutivo }}</strong></span>
             <span class="text-muted small">Ref: {{ $detalle->asiento->Referencia }}</span>
         </div>
@@ -20,8 +19,7 @@
             <div class="row align-items-end">
                 <div class="col-md-6">
                     <label class="fw-bold text-info">Línea del Asiento seleccionada:</label>
-                    {{-- Selector simplificado: Ya sabemos qué línea es --}}
-                    <select id="select_detalle" class="form-select bg-secondary text-white border-0 mt-1" onchange="actualizarMontoObjetivo()">
+                    <select id="select_detalle" class="form-select bg-secondary text-white border-0 mt-1">
                         <option value="{{ $detalle->IdAsientoDetalle }}" data-monto="{{ $detalle->Monto }}" selected>
                             Cuenta: {{ $detalle->IdCuentaContable }} - Monto: ₡{{ number_format($detalle->Monto, 2) }}
                         </option>
@@ -69,6 +67,17 @@
 
         {{-- Tabla de Distribución --}}
         <div class="col-md-8">
+            {{-- Mostramos errores de validación del Form Request si existen --}}
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('prorrateo.guardar') }}" method="POST">
                 @csrf
                 <input type="hidden" name="es_tercero" value="0">
@@ -118,31 +127,57 @@
 
 @section('scripts')
 <script>
+    // 1. Declaración ÚNICA de variables globales
     let lineas = [];
-    // Inicializamos con el monto de la línea actual
-    let montoObjetivo = {{ $detalle->Monto }};
+    const montoObjetivo = parseFloat("{{ $detalle->Monto }}");
 
+    // 2. Función de carga inicial (unificada)
+    window.onload = function() {
+        // Traemos lo que ya existe en la DB desde el controlador
+        const existentes = @json($distribucionActual ?? []);
+        
+        if (existentes && existentes.length > 0) {
+            lineas = existentes.map(d => {
+                // Buscamos el nombre del centro en el select para la visualización
+                const option = document.querySelector(`#select_centro option[value="${d.IdCentroCosto}"]`);
+                return {
+                    id: d.IdCentroCosto,
+                    nombre: option ? option.text : `ID: ${d.IdCentroCosto}`,
+                    monto: parseFloat(d.Monto),
+                    nota: d.Nota || "" 
+                };
+            });
+        }
+        // Ejecutamos el primer renderizado
+        renderizarTabla();
+    };
+
+    // 3. Función para agregar nuevas líneas
     function agregarLinea() {
         const selectC = document.getElementById('select_centro');
-        const monto = parseFloat(document.getElementById('input_monto').value);
+        const inputMonto = document.getElementById('input_monto');
+        const monto = parseFloat(inputMonto.value);
         const nota = document.getElementById('input_nota').value;
 
-        if (!montoObjetivo || montoObjetivo <= 0) {
-            alert("Error: No se detectó el monto de la línea.");
+        // Validaciones de seguridad
+        if (!selectC.value) {
+            alert("Debe seleccionar un Centro de Costo.");
             return;
         }
-        if (!selectC.value || isNaN(monto) || monto <= 0) {
-            alert("Seleccione un centro de costo y un monto válido.");
+        if (isNaN(monto) || monto <= 0) {
+            alert("Ingrese un monto válido mayor a cero.");
             return;
         }
 
         const sumaActual = lineas.reduce((acc, curr) => acc + curr.monto, 0);
-        // Permitir un pequeño margen de error decimal (0.01)
+        
+        // Validación de tope (margen de 0.01)
         if ((sumaActual + monto) > (montoObjetivo + 0.01)) {
-            alert("La suma de los montos excede el total de la línea (₡" + montoObjetivo.toLocaleString() + ")");
+            alert(`No puede exceder el total de la línea. Restante: ₡${(montoObjetivo - sumaActual).toFixed(2)}`);
             return;
         }
 
+        // Agregar al array global
         lineas.push({
             id: selectC.value,
             nombre: selectC.options[selectC.selectedIndex].text,
@@ -150,11 +185,14 @@
             nota: nota
         });
 
-        document.getElementById('input_monto').value = "";
+        // Limpiar campos de entrada
+        inputMonto.value = "";
         document.getElementById('input_nota').value = "";
+        
         renderizarTabla();
     }
 
+    // 4. Función de renderizado de la tabla y validación del botón
     function renderizarTabla() {
         const tbody = document.getElementById('tabla_prorrateo');
         let html = "";
@@ -166,14 +204,26 @@
             
             html += `
                 <tr>
-                    <td>${l.nombre} <input type="hidden" name="distribucion[${index}][id_destino]" value="${l.id}"></td>
-                    <td class="small text-muted">${l.nota} <input type="hidden" name="distribucion[${index}][nota]" value="${l.nota}"></td>
-                    <td class="text-end fw-bold">₡${l.monto.toLocaleString('es-CR', {minimumFractionDigits: 2})} 
+                    <td>
+                        ${l.nombre} 
+                        <input type="hidden" name="distribucion[${index}][id_destino]" value="${l.id}">
+                    </td>
+                    <td class="small text-muted">
+                        ${l.nota}
+                        <input type="hidden" name="distribucion[${index}][nota]" value="${l.nota}">
+                    </td>
+                    <td class="text-end fw-bold">
+                        ₡${l.monto.toLocaleString('es-CR', {minimumFractionDigits: 2})} 
                         <input type="hidden" name="distribucion[${index}][monto]" value="${l.monto}">
                     </td>
-                    <td class="text-end text-muted small">${porcentaje.toFixed(2)}%</td>
+                    <td class="text-end text-muted small">
+                        ${porcentaje.toFixed(2)}%
+                        <input type="hidden" name="distribucion[${index}][porcentaje]" value="${porcentaje.toFixed(2)}">
+                    </td>
                     <td class="text-center">
-                        <button type="button" onclick="eliminar(${index})" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        <button type="button" onclick="eliminar(${index})" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>`;
         });
@@ -184,7 +234,7 @@
         document.getElementById('total_asignado').innerText = `₡${suma.toLocaleString('es-CR', {minimumFractionDigits: 2})}`;
         document.getElementById('diferencia_pendiente').innerText = `₡${Math.max(0, diferencia).toLocaleString('es-CR', {minimumFractionDigits: 2})}`;
         
-        // El botón se habilita solo si la diferencia es prácticamente cero
+        // Habilitar botón solo si la diferencia es despreciable (redondeo)
         document.getElementById('btn_guardar').disabled = (Math.abs(diferencia) > 0.01);
     }
 
@@ -192,8 +242,5 @@
         lineas.splice(index, 1);
         renderizarTabla();
     }
-
-    // Ejecutar al cargar para inicializar estados
-    window.onload = renderizarTabla;
 </script>
 @endsection

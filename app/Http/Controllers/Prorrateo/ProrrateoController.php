@@ -10,31 +10,26 @@ use App\Models\Tercero;
 use App\Models\AsientoDetalleCentroCosto; 
 use App\Models\AsientoDetalleTercero;
 use App\Http\Requests\GuardarProrrateoRequest;
-use Illuminate\Http\Request; // Importante añadir esta
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProrrateoController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Obtener todos los periodos para el selector
         $periodos = DB::table('periodocontable')
             ->orderBy('Anio', 'desc')
             ->orderBy('Mes', 'desc')
             ->get();
         
-        // 2. REQUISITO AUX7/8: Buscar el periodo abierto actual por defecto
         $periodoAbierto = DB::table('periodocontable')
             ->where('Estado', 'Abierto')
             ->first();
 
-        // Si el usuario no ha filtrado, usamos el "Abierto", si no hay abierto, el primero de la lista
         $idPeriodo = $request->get('id_periodo', $periodoAbierto->IdPeriodo ?? ($periodos->first()->IdPeriodo ?? null));
 
-        // 3. Iniciar consulta de asientos
         $query = AsientoContableEncabezado::where('IdPeriodo', $idPeriodo);
 
-        // 4. Filtro opcional por estado (desde el formulario del index)
         if ($request->filled('estado_id')) {
             $query->where('IdEstadoAsiento', $request->estado_id);
         }
@@ -50,66 +45,97 @@ class ProrrateoController extends Controller
         return response()->json($detalles);
     }
 
-    // Los métodos prorratearCostos y prorratearTerceros ahora reciben el ID de la LÍNEA 
-    // para cumplir con "Junto a cada línea"
     public function prorratearCostos($idDetalle)
     {
         $detalle = AsientoContableDetalle::with('asiento')->findOrFail($idDetalle);
         
-        // REQUISITO: Validar estado antes de entrar a la vista
         if (!in_array($detalle->asiento->IdEstadoAsiento, [1, 2])) {
             return redirect()->route('asientos.index')->with('error', 'Solo se puede prorratear en estados Borrador o Pendiente.');
         }
 
         $centros = CentroCosto::all(); 
-        return view('prorrateo.costos', compact('detalle', 'centros'));
+        
+        // CORRECCIÓN: Cargar prorrateos ya existentes para mostrar en la tabla
+        $distribucionActual = AsientoDetalleCentroCosto::where('IdAsientoDetalle', $idDetalle)->get();
+
+        return view('prorrateo.costos', compact('detalle', 'centros', 'distribucionActual'));
     }
 
     public function prorratearTerceros($idDetalle)
     {
-        $detalle = AsientoContableDetalle::with('asiento')->findOrFail($idDetalle);
+        $detalle = AsientoContableDetalle::with('asiento.detalles')->findOrFail($idDetalle);
 
         if (!in_array($detalle->asiento->IdEstadoAsiento, [1, 2])) {
-            return redirect()->route('asientos.index')->with('error', 'Solo se puede prorratear en estados Borrador o Pendiente.');
+            return redirect()->route('asientos.index')
+            ->with('error', 'Solo se puede prorratear en estados Borrador o Pendiente.');
         }
 
-        $terceros = Tercero::all();
-        return view('prorrateo.terceros', compact('detalle', 'terceros'));
+        $terceros = Tercero::where('Estado',1)->get();
+
+        $distribucionActual = DB::table('asientodetalletercero as adt')
+            ->join('catalogoterceros as t', 't.IdTercero', '=', 'adt.IdTercero')
+            ->where('adt.IdAsientoDetalle', $idDetalle)
+            ->where('t.Estado', 1)
+            ->select(
+                'adt.IdTercero',
+                'adt.Monto',
+                'adt.Porcentaje',
+                'adt.Nota',
+                't.Nombre',
+                't.Identificacion'
+            )
+            ->get();
+
+        $asiento = $detalle->asiento;
+
+        return view('prorrateo.terceros', compact(
+            'detalle',
+            'terceros',
+            'distribucionActual',
+            'asiento',
+            'idDetalle'
+        ));
     }
 
     public function guardarProrrateo(GuardarProrrateoRequest $request)
     {
         try {
             DB::beginTransaction();
-            $esTercero = $request->has('es_tercero'); 
-            // Asegúrate de tener el ID del usuario en sesión
+
+            // CORRECCIÓN: Evaluamos el VALOR, no solo la existencia del campo
+            $esTercero = $request->input('es_tercero') == "1"; 
             $usuarioId = session('user_id') ?? 1; 
 
             if ($esTercero) {
+                // Limpiamos distribución previa para evitar duplicados al re-guardar
                 AsientoDetalleTercero::where('IdAsientoDetalle', $request->id_detalle)->delete();
+                
                 foreach ($request->distribucion as $item) {
                     AsientoDetalleTercero::create([
                         'IdAsientoDetalle' => $request->id_detalle,
                         'IdTercero'        => $item['id_destino'],
                         'Monto'            => $item['monto'],
                         'Porcentaje'       => $item['porcentaje'],
+                        'Nota'             => $item['nota'] ?? null,
                     ]);
                 }
                 $accion = "Prorrateo de Terceros realizado";
             } else {
+                // Limpiamos distribución previa
                 AsientoDetalleCentroCosto::where('IdAsientoDetalle', $request->id_detalle)->delete();
+                
                 foreach ($request->distribucion as $item) {
                     AsientoDetalleCentroCosto::create([
                         'IdAsientoDetalle' => $request->id_detalle,
-                        'IdCentroCosto'    => $item['id_destino'],
+                        'IdCentroCosto'    => $item['id_destino'], 
                         'Monto'            => $item['monto'],
-                        'Porcentaje'       => $item['porcentaje'],
+                        'Porcentaje'       => $item['porcentaje'] ?? 0,
                     ]);
                 }
                 $accion = "Prorrateo de Centros de Costo realizado";
             }
 
-            // --- REQUISITO: MANEJO DE BITÁCORAS ---
+            // Bitácora
             DB::table('bitacora')->insert([
                 'IdUsuarioAccion'   => $usuarioId,
                 'FechaBitacora'     => now(),
@@ -131,4 +157,4 @@ class ProrrateoController extends Controller
             return back()->withErrors(['error' => 'Error en el guardado: ' . $e->getMessage()]);
         }
     }
-}
+}   
