@@ -47,9 +47,23 @@
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-geo-alt"></i> Direcciones</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-person-lines-fill"></i> Contactos</a></li>
 
-                    <li class="nav-item mt-3"><span class="text-white h6">Asignaciones</span></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-journal-text"></i> Centros de Costo</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-person-check"></i> Terceros</a></li>
+                    <li class="nav-item mt-3"><span class="text-white h6">Asignaciones / Prorrateo</span></li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white {{ request()->routeIs('asientos.index') ? 'fw-bold bg-primary rounded' : '' }}" 
+                        href="{{ route('asientos.index') }}">
+                            <i class="bi bi-journal-check"></i> Prorrateo de Asientos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white {{ request()->routeIs('prorrateo.costos*') ? 'text-info' : '' }}" href="#">
+                            <i class="bi bi-diagram-3"></i> Historial de Costos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white {{ request()->routeIs('prorrateo.terceros*') ? 'text-info' : '' }}" href="#">
+                            <i class="bi bi-person-check"></i> Historial de Terceros
+                        </a>
+                    </li>
 
                     <li class="nav-item mt-3"><span class="text-white h6">Reportes</span></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text"></i> Centros de Costo</a></li>

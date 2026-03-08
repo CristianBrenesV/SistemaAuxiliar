@@ -27,6 +27,25 @@ Route::middleware('web')->group(function () {
     Route::post('/usuarios/cambiar-clave', [UserController::class, 'cambiarClaveUsuario'])->name('usuarios.cambiarClave');
 });
 
+// ================= PRORRATEO =================
+use App\Http\Controllers\Prorrateo\ProrrateoController;
+
+Route::middleware('web')->group(function () {
+    // Listado principal (Index)
+    Route::get('/prorrateo', [ProrrateoController::class, 'index'])->name('asientos.index');
+
+    // Carga de detalles vía AJAX (Para visualizar las líneas en el index)
+    Route::get('/asientos/{id}/detalles', [ProrrateoController::class, 'obtenerDetalles'])->name('asientos.detalles');
+
+    // Rutas de Prorrateo: Ahora apuntan al ID del Detalle (Línea)
+    // Esto permite que el botón esté "Junto a cada línea" como pide la historia.
+    Route::get('/prorrateo/terceros/{idDetalle}', [ProrrateoController::class, 'prorratearTerceros'])->name('prorrateo.terceros');
+    Route::get('/prorrateo/costos/{idDetalle}', [ProrrateoController::class, 'prorratearCostos'])->name('prorrateo.costos');
+
+    // Guardado de la distribución de montos
+    Route::post('/prorrateo/guardar', [ProrrateoController::class, 'guardarProrrateo'])->name('prorrateo.guardar');
+});
+
 // ================= PÁGINA INICIAL =================
 Route::get('/', function () {
     return redirect()->route('login');
