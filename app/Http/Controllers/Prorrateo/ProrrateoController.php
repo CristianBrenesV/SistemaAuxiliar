@@ -55,7 +55,6 @@ class ProrrateoController extends Controller
 
         $centros = CentroCosto::all(); 
         
-        // CORRECCIÓN: Cargar prorrateos ya existentes para mostrar en la tabla
         $distribucionActual = AsientoDetalleCentroCosto::where('IdAsientoDetalle', $idDetalle)->get();
 
         return view('prorrateo.costos', compact('detalle', 'centros', 'distribucionActual'));
@@ -102,12 +101,10 @@ class ProrrateoController extends Controller
         try {
             DB::beginTransaction();
 
-            // CORRECCIÓN: Evaluamos el VALOR, no solo la existencia del campo
             $esTercero = $request->input('es_tercero') == "1"; 
             $usuarioId = session('user_id') ?? 1; 
 
             if ($esTercero) {
-                // Limpiamos distribución previa para evitar duplicados al re-guardar
                 AsientoDetalleTercero::where('IdAsientoDetalle', $request->id_detalle)->delete();
                 
                 foreach ($request->distribucion as $item) {
@@ -121,7 +118,6 @@ class ProrrateoController extends Controller
                 }
                 $accion = "Prorrateo de Terceros realizado";
             } else {
-                // Limpiamos distribución previa
                 AsientoDetalleCentroCosto::where('IdAsientoDetalle', $request->id_detalle)->delete();
                 
                 foreach ($request->distribucion as $item) {
@@ -135,7 +131,6 @@ class ProrrateoController extends Controller
                 $accion = "Prorrateo de Centros de Costo realizado";
             }
 
-            // Bitácora
             DB::table('bitacora')->insert([
                 'IdUsuarioAccion'   => $usuarioId,
                 'FechaBitacora'     => now(),

@@ -131,7 +131,6 @@
 
 @push('scripts')
 <script>
-    // Usamos un objeto único para evitar que Laravel o el Layout interfieran
     const GestorProrrateo = {
         lineas: [],
         montoObjetivo: parseFloat("{{ $detalle->Monto }}"),
@@ -139,7 +138,6 @@
         init: function() {
             console.log("Iniciando Gestor... Monto objetivo:", this.montoObjetivo);
             
-            // Vincular el evento manualmente al botón
             const btn = document.getElementById('btn_ejecutar_agregado');
             if (btn) {
                 btn.onclick = () => this.agregar();
@@ -148,7 +146,6 @@
                 console.error("No se encontró el botón con ID: btn_ejecutar_agregado");
             }
 
-            // Cargar datos existentes
             const iniciales = @json($distribucionActual ?? []);
             if (iniciales.length > 0) {
                 this.lineas = iniciales.map(i => ({
@@ -172,6 +169,12 @@
             const nota = inputNota.value;
 
             if (!id) return alert("Seleccione un Tercero");
+            const existe = this.lineas.some(l => l.id == id);
+            if (existe) {
+                alert("Este tercero ya fue agregado al prorrateo.");
+                return;
+            }
+
             if (isNaN(monto) || monto <= 0) return alert("Monto no válido");
 
             const sumaActual = this.lineas.reduce((acc, curr) => acc + curr.monto, 0);
@@ -188,9 +191,9 @@
                 nota: nota
             });
 
-            // Limpiar
             inputMonto.value = "";
             inputNota.value = "";
+            select.value = "";
             this.render();
         },
 
@@ -218,10 +221,19 @@
 
             tbody.innerHTML = html || '<tr><td colspan="5" class="text-center py-4">Sin datos</td></tr>';
             
-            // Actualizar footer
             const diferencia = this.montoObjetivo - sumaTotal;
             document.getElementById('total_asignado').innerText = "₡" + sumaTotal.toFixed(2);
-            document.getElementById('diferencia_pendiente').innerText = "₡" + Math.max(0, diferencia).toFixed(2);
+            const pendienteElemento = document.getElementById('diferencia_pendiente');
+
+            pendienteElemento.innerText = "₡" + Math.max(0, diferencia).toFixed(2);
+
+            if (Math.abs(diferencia) > 0.01) {
+                pendienteElemento.classList.remove("text-success");
+                pendienteElemento.classList.add("text-warning");
+            } else {
+                pendienteElemento.classList.remove("text-warning");
+                pendienteElemento.classList.add("text-success");
+            }
             document.getElementById('btn_guardar').disabled = (Math.abs(diferencia) > 0.01);
         },
 
@@ -231,7 +243,6 @@
         }
     };
 
-    // Lanzar la inicialización
     document.addEventListener('DOMContentLoaded', () => GestorProrrateo.init());
 </script>
 @endpush

@@ -130,7 +130,6 @@
 <script>
     async function cargarDetalle(idAsiento, puedeProrratear) {
         const contenedor = document.getElementById(`detalle-${idAsiento}`);
-        // Evitar recarga si ya tiene datos (y no es el mensaje de carga)
         if (contenedor.innerHTML.trim() !== "" && !contenedor.innerHTML.includes("Cargando")) return;
 
         try {
@@ -142,7 +141,6 @@
                 const badgeColor = linea.TipoMovimiento === 'D' ? 'text-primary' : 'text-info';
                 const montoFormatted = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(linea.Monto);
                 
-                // Botones solo si el estado es Borrador o Pendiente
                 let botones = '<span class="text-muted small">N/A</span>';
                 if (puedeProrratear) {
                     botones = `

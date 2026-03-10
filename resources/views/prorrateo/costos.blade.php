@@ -127,18 +127,14 @@
 
 @section('scripts')
 <script>
-    // 1. Declaración ÚNICA de variables globales
     let lineas = [];
     const montoObjetivo = parseFloat("{{ $detalle->Monto }}");
 
-    // 2. Función de carga inicial (unificada)
     window.onload = function() {
-        // Traemos lo que ya existe en la DB desde el controlador
         const existentes = @json($distribucionActual ?? []);
         
         if (existentes && existentes.length > 0) {
             lineas = existentes.map(d => {
-                // Buscamos el nombre del centro en el select para la visualización
                 const option = document.querySelector(`#select_centro option[value="${d.IdCentroCosto}"]`);
                 return {
                     id: d.IdCentroCosto,
@@ -148,22 +144,26 @@
                 };
             });
         }
-        // Ejecutamos el primer renderizado
         renderizarTabla();
     };
 
-    // 3. Función para agregar nuevas líneas
     function agregarLinea() {
         const selectC = document.getElementById('select_centro');
         const inputMonto = document.getElementById('input_monto');
         const monto = parseFloat(inputMonto.value);
         const nota = document.getElementById('input_nota').value;
 
-        // Validaciones de seguridad
         if (!selectC.value) {
             alert("Debe seleccionar un Centro de Costo.");
             return;
         }
+
+        const existe = lineas.some(l => l.id == selectC.value);
+        if (existe) {
+            alert("Este Centro de Costo ya fue agregado al prorrateo.");
+            return;
+        }
+
         if (isNaN(monto) || monto <= 0) {
             alert("Ingrese un monto válido mayor a cero.");
             return;
@@ -171,13 +171,11 @@
 
         const sumaActual = lineas.reduce((acc, curr) => acc + curr.monto, 0);
         
-        // Validación de tope (margen de 0.01)
         if ((sumaActual + monto) > (montoObjetivo + 0.01)) {
             alert(`No puede exceder el total de la línea. Restante: ₡${(montoObjetivo - sumaActual).toFixed(2)}`);
             return;
         }
 
-        // Agregar al array global
         lineas.push({
             id: selectC.value,
             nombre: selectC.options[selectC.selectedIndex].text,
@@ -185,14 +183,13 @@
             nota: nota
         });
 
-        // Limpiar campos de entrada
         inputMonto.value = "";
         document.getElementById('input_nota').value = "";
+        selectC.value = "";
         
         renderizarTabla();
     }
 
-    // 4. Función de renderizado de la tabla y validación del botón
     function renderizarTabla() {
         const tbody = document.getElementById('tabla_prorrateo');
         let html = "";
@@ -232,9 +229,18 @@
         
         const diferencia = montoObjetivo - suma;
         document.getElementById('total_asignado').innerText = `₡${suma.toLocaleString('es-CR', {minimumFractionDigits: 2})}`;
-        document.getElementById('diferencia_pendiente').innerText = `₡${Math.max(0, diferencia).toLocaleString('es-CR', {minimumFractionDigits: 2})}`;
+        const pendienteElemento = document.getElementById('diferencia_pendiente');
+
+        pendienteElemento.innerText = `₡${Math.max(0, diferencia).toLocaleString('es-CR', {minimumFractionDigits: 2})}`;
+
+        if (Math.abs(diferencia) > 0.01) {
+            pendienteElemento.classList.remove("text-success");
+            pendienteElemento.classList.add("text-warning");
+        } else {
+            pendienteElemento.classList.remove("text-warning");
+            pendienteElemento.classList.add("text-success");
+        }
         
-        // Habilitar botón solo si la diferencia es despreciable (redondeo)
         document.getElementById('btn_guardar').disabled = (Math.abs(diferencia) > 0.01);
     }
 
