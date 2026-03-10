@@ -41,7 +41,38 @@ class ProrrateoController extends Controller
 
     public function obtenerDetalles($id)
     {
-        $detalles = AsientoContableDetalle::where('IdAsiento', $id)->get();
+        $detalles = DB::table('asientocontabledetalle as d')
+            ->join('cuentascontables as c', 'c.IdCuenta', '=', 'd.IdCuentaContable')
+
+            ->leftJoin('asientodetallecentrocosto as cc', 'cc.IdAsientoDetalle', '=', 'd.IdAsientoDetalle')
+            ->leftJoin('asientodetalletercero as t', 't.IdAsientoDetalle', '=', 'd.IdAsientoDetalle')
+
+            ->where('d.IdAsiento', $id)
+
+            ->select(
+                'd.IdAsientoDetalle',
+                'd.IdCuentaContable',
+                'c.CodigoCuenta',
+                'c.Nombre',
+                'd.TipoMovimiento',
+                'd.Monto',
+                'd.Descripcion',
+                DB::raw('COUNT(DISTINCT cc.IdDetalleCC) as tieneCC'),
+                DB::raw('COUNT(DISTINCT t.IdDetalleTercero) as tieneTercero')
+            )
+
+            ->groupBy(
+                'd.IdAsientoDetalle',
+                'd.IdCuentaContable',
+                'c.CodigoCuenta',
+                'c.Nombre',
+                'd.TipoMovimiento',
+                'd.Monto',
+                'd.Descripcion'
+            )
+
+            ->get();
+
         return response()->json($detalles);
     }
 

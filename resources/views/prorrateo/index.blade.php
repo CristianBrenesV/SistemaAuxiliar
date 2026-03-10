@@ -4,7 +4,6 @@
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
         <h1 class="h3 text-dark"><i class="bi bi-calculator me-2"></i>Prorrateo de Asientos</h1>
-        <span class="badge bg-primary fs-6 shadow-sm">Periodo ID: {{ $idPeriodo ?? 'N/A' }}</span>
     </div>
 
     {{-- Filtros: Estado y Periodo --}}
@@ -142,21 +141,35 @@
                 const montoFormatted = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(linea.Monto);
                 
                 let botones = '<span class="text-muted small">N/A</span>';
+
                 if (puedeProrratear) {
+
+                    let iconCC = linea.tieneCC > 0 ? "bi-check-circle-fill text-success" : "bi-diagram-3";
+                    let iconT  = linea.tieneTercero > 0 ? "bi-check-circle-fill text-success" : "bi-person";
+
                     botones = `
                         <div class="btn-group btn-group-xs shadow-sm">
-                            <a href="/prorrateo/costos/${linea.IdAsientoDetalle}" class="btn btn-outline-primary py-0" title="Centros de Costo">
-                                <i class="bi bi-diagram-3"></i> CC
+
+                            <a href="/prorrateo/costos/${linea.IdAsientoDetalle}" 
+                            class="btn btn-outline-primary py-0"
+                            title="Centros de Costo">
+
+                            <i class="bi ${iconCC}"></i> CC
                             </a>
-                            <a href="/prorrateo/terceros/${linea.IdAsientoDetalle}" class="btn btn-outline-success py-0" title="Asignar Terceros">
-                                <i class="bi bi-person"></i> T
+
+                            <a href="/prorrateo/terceros/${linea.IdAsientoDetalle}" 
+                            class="btn btn-outline-success py-0"
+                            title="Asignar Terceros">
+
+                            <i class="bi ${iconT}"></i> T
                             </a>
+
                         </div>`;
                 }
 
                 html += `
                     <tr>
-                        <td class="ps-3 fw-bold">${linea.IdCuentaContable}</td>
+                        <td class="ps-3 fw-bold">${linea.CodigoCuenta} - ${linea.Nombre}</td>
                         <td class="text-center fw-bold ${badgeColor}">${linea.TipoMovimiento}</td>
                         <td class="text-end fw-bold">${montoFormatted}</td>
                         <td class="ps-3 text-muted">${linea.Descripcion || 'Sin descripción'}</td>
