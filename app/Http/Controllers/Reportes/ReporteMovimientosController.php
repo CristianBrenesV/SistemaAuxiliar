@@ -36,7 +36,15 @@ class ReporteMovimientosController extends Controller
             $query->where('a.IdEstadoAsiento',$request->estado_id);
         }
 
-        $total = (clone $query)->sum('t.Monto');
+        $totalDebe = (clone $query)
+        ->where('d.TipoMovimiento','D')
+        ->sum('t.Monto');
+
+        $totalHaber = (clone $query)
+        ->where('d.TipoMovimiento','C')
+        ->sum('t.Monto');
+
+        $diferencia = $totalDebe - $totalHaber;
 
         $movimientos = $query
         ->select(
@@ -51,7 +59,13 @@ class ReporteMovimientosController extends Controller
         ->orderBy('a.Fecha','desc')
         ->paginate(10);
 
-        return view('reportes.terceros',compact('movimientos','terceros','total'));
+        return view('reportes.terceros',compact(
+            'movimientos',
+            'terceros',
+            'totalDebe',
+            'totalHaber',
+            'diferencia'
+        ));
     }
 
 
@@ -83,7 +97,15 @@ class ReporteMovimientosController extends Controller
             $query->where('a.IdEstadoAsiento',$request->estado_id);
         }
 
-        $total = (clone $query)->sum('cc.Monto');
+        $totalDebe = (clone $query)
+        ->where('d.TipoMovimiento','D')
+        ->sum('cc.Monto');
+
+        $totalHaber = (clone $query)
+        ->where('d.TipoMovimiento','C')
+        ->sum('cc.Monto');
+
+        $diferencia = $totalDebe - $totalHaber;
 
         $movimientos = $query
         ->select(
@@ -98,6 +120,12 @@ class ReporteMovimientosController extends Controller
         ->orderBy('a.Fecha','desc')
         ->paginate(10);
 
-        return view('reportes.centros',compact('movimientos','centros','total'));
+        return view('reportes.centros',compact(
+            'movimientos',
+            'centros',
+            'totalDebe',
+            'totalHaber',
+            'diferencia'
+        ));
     }
 }

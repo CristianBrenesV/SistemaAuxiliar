@@ -121,30 +121,20 @@ Limpiar filtros
 {{ $m->CodigoCuenta }} - {{ $m->Cuenta }}
 </td>
 
-
 <td class="text-end">
-
-@if($m->TipoMovimiento == 'Debe')
-
+@if($m->TipoMovimiento == 'D')
 <span class="text-success fw-semibold">
 {{ number_format($m->Monto,2) }}
 </span>
-
 @endif
-
 </td>
 
-
 <td class="text-end">
-
-@if($m->TipoMovimiento == 'Haber')
-
+@if($m->TipoMovimiento == 'C')
 <span class="text-danger fw-semibold">
 {{ number_format($m->Monto,2) }}
 </span>
-
 @endif
-
 </td>
 
 </tr>
@@ -172,27 +162,44 @@ No se encontraron movimientos
 
 </div>
 
-
 <div class="row mt-4">
 
-<div class="col-md-12">
+<div class="col-md-4">
 
-<div class="alert alert-info d-flex justify-content-between align-items-center">
-
-<div>
-<strong>Total Movimientos</strong>
-</div>
-
-<div class="fs-5 fw-bold">
-{{ number_format($total,2) }}
+<div class="alert alert-success text-center">
+<strong>Total Debe</strong><br>
+<span class="fs-5 fw-bold">
+{{ number_format($totalDebe,2) }}
+</span>
 </div>
 
 </div>
 
+<div class="col-md-4">
+
+<div class="alert alert-danger text-center">
+<strong>Total Haber</strong><br>
+<span class="fs-5 fw-bold">
+{{ number_format($totalHaber,2) }}
+</span>
 </div>
 
 </div>
 
+<div class="col-md-4">
+
+<div class="alert {{ $diferencia == 0 ? 'alert-success' : 'alert-danger' }} text-center">
+<strong>Diferencia</strong><br>
+<span class="fs-5 fw-bold">
+{{ number_format($diferencia,2) }}
+</span>
+</div>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
