@@ -66,8 +66,20 @@
                     </li>
 
                     <li class="nav-item mt-3"><span class="text-white h6">Reportes</span></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text"></i> Centros de Costo</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#"><i class="bi bi-file-earmark-text"></i> Terceros</a></li>
+
+                    <li class="nav-item">
+                    <a class="nav-link text-white {{ request()->routeIs('reportes.centros') ? 'fw-bold bg-primary rounded' : '' }}"
+                    href="{{ route('reportes.centros') }}">
+                    <i class="bi bi-diagram-3"></i> Movimientos por Centro de Costo
+                    </a>
+                    </li>
+
+                    <li class="nav-item">
+                    <a class="nav-link text-white {{ request()->routeIs('reportes.terceros') ? 'fw-bold bg-primary rounded' : '' }}"
+                    href="{{ route('reportes.terceros') }}">
+                    <i class="bi bi-person-lines-fill"></i> Movimientos por Tercero
+                    </a>
+                    </li>
 
                 </ul>
             </nav>

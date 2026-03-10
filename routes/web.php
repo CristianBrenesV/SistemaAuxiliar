@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Usuarios\UserController;
+use App\Http\Controllers\Reportes\ReporteMovimientosController;
 
 // ================= LOGIN / LOGOUT =================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -31,19 +32,18 @@ Route::middleware('web')->group(function () {
 use App\Http\Controllers\Prorrateo\ProrrateoController;
 
 Route::middleware('web')->group(function () {
-    // Listado principal (Index)
     Route::get('/prorrateo', [ProrrateoController::class, 'index'])->name('asientos.index');
 
-    // Carga de detalles vía AJAX (Para visualizar las líneas en el index)
     Route::get('/asientos/{id}/detalles', [ProrrateoController::class, 'obtenerDetalles'])->name('asientos.detalles');
-
-    // Rutas de Prorrateo: Ahora apuntan al ID del Detalle (Línea)
-    // Esto permite que el botón esté "Junto a cada línea" como pide la historia.
     Route::get('/prorrateo/terceros/{idDetalle}', [ProrrateoController::class, 'prorratearTerceros'])->name('prorrateo.terceros');
     Route::get('/prorrateo/costos/{idDetalle}', [ProrrateoController::class, 'prorratearCostos'])->name('prorrateo.costos');
-
-    // Guardado de la distribución de montos
     Route::post('/prorrateo/guardar', [ProrrateoController::class, 'guardarProrrateo'])->name('prorrateo.guardar');
+});
+
+// ================= REPORTES =================
+Route::middleware('web')->group(function () {
+    Route::get('/reportes/terceros', [ReporteMovimientosController::class, 'reporteTerceros'])->name('reportes.terceros');
+    Route::get('/reportes/centros', [ReporteMovimientosController::class, 'reporteCentros'])->name('reportes.centros');
 });
 
 // ================= PÁGINA INICIAL =================
