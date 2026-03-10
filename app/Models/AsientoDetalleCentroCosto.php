@@ -14,6 +14,7 @@ class AsientoDetalleCentroCosto extends Model
         'IdAsientoDetalle',
         'IdCentroCosto',
         'Monto',
-        'Porcentaje'
+        'Porcentaje',
+        'Nota'
     ];
 }

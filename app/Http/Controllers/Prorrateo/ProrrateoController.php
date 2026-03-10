@@ -104,9 +104,21 @@ class ProrrateoController extends Controller
             $esTercero = $request->input('es_tercero') == "1"; 
             $usuarioId = session('user_id') ?? 1; 
 
+            $total = array_sum(array_column($request->distribucion, 'monto'));
+
+            $montoLinea = AsientoContableDetalle::where('IdAsientoDetalle', $request->id_detalle)
+                ->value('Monto');
+
+            if (abs($total - $montoLinea) > 0.01) {
+                return back()->withErrors([
+                    'error' => 'El total del prorrateo no coincide con el monto de la línea.'
+                ]);
+            }
+
             if ($esTercero) {
                 AsientoDetalleTercero::where('IdAsientoDetalle', $request->id_detalle)->delete();
                 
+
                 foreach ($request->distribucion as $item) {
                     AsientoDetalleTercero::create([
                         'IdAsientoDetalle' => $request->id_detalle,
@@ -126,6 +138,7 @@ class ProrrateoController extends Controller
                         'IdCentroCosto'    => $item['id_destino'], 
                         'Monto'            => $item['monto'],
                         'Porcentaje'       => $item['porcentaje'] ?? 0,
+                        'Nota'             => $item['nota'] ?? null
                     ]);
                 }
                 $accion = "Prorrateo de Centros de Costo realizado";

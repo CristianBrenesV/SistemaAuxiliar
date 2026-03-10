@@ -3,30 +3,30 @@
 @section('content')
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center">
-        <h2 class="mt-4 text-white">Prorrateo por Centros de Costo</h2>
-        <a href="{{ route('asientos.index') }}" class="btn btn-outline-light mt-3">
+        <h2 class="mt-4 text-dark fw-bold">Prorrateo por Centros de Costo</h2>
+        <a href="{{ route('asientos.index') }}" class="btn btn-outline-secondary mt-3">
             <i class="bi bi-arrow-left"></i> Volver
         </a>
     </div>
     
     {{-- Info del Asiento --}}
-    <div class="card bg-dark text-white border-secondary mb-4 shadow">
-        <div class="card-header border-secondary bg-dark d-flex justify-content-between">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between">
             <span><i class="bi bi-info-circle me-1"></i> Asiento: <strong>{{ $detalle->asiento->Consecutivo }}</strong></span>
             <span class="text-muted small">Ref: {{ $detalle->asiento->Referencia }}</span>
         </div>
         <div class="card-body">
             <div class="row align-items-end">
                 <div class="col-md-6">
-                    <label class="fw-bold text-info">Línea del Asiento seleccionada:</label>
-                    <select id="select_detalle" class="form-select bg-secondary text-white border-0 mt-1">
+                    <label class="fw-bold text-muted">Línea del Asiento seleccionada:</label>
+                    <select id="select_detalle" class="form-select">
                         <option value="{{ $detalle->IdAsientoDetalle }}" data-monto="{{ $detalle->Monto }}" selected>
                             Cuenta: {{ $detalle->IdCuentaContable }} - Monto: ₡{{ number_format($detalle->Monto, 2) }}
                         </option>
                     </select>
                 </div>
                 <div class="col-md-6 text-end">
-                    <h4 class="mb-0 text-info">Monto a Distribuir: <span id="display_monto_objetivo">₡{{ number_format($detalle->Monto, 2) }}</span></h4>
+                    <h4 class="mb-0 text-primary fw-bold">Monto a Distribuir: <span id="display_monto_objetivo">₡{{ number_format($detalle->Monto, 2) }}</span></h4>
                 </div>
             </div>
         </div>
@@ -35,12 +35,12 @@
     <div class="row">
         {{-- Formulario de Entrada --}}
         <div class="col-md-4">
-            <div class="card bg-dark text-white border-secondary h-100 shadow">
-                <div class="card-header border-secondary text-info fw-bold">1. Asignar Centro de Costo</div>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light fw-bold">1. Asignar Centro de Costo</div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Centro de Costo</label>
-                        <select id="select_centro" class="form-select bg-secondary text-white border-0">
+                        <select id="select_centro" class="form-select">
                             <option value="">-- Seleccione un Centro --</option>
                             @foreach($centros as $c)
                                 <option value="{{ $c->IdCentroCosto }}">{{ $c->Codigo }} - {{ $c->Nombre }}</option>
@@ -50,13 +50,13 @@
                     <div class="mb-3">
                         <label class="form-label">Monto</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-secondary text-white border-0">₡</span>
+                            <span class="form-control">₡</span>
                             <input type="number" id="input_monto" class="form-control bg-secondary text-white border-0" step="0.01" placeholder="0.00">
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Nota / Descripción (Opcional)</label>
-                        <textarea id="input_nota" class="form-control bg-secondary text-white border-0" rows="2"></textarea>
+                        <textarea id="input_nota" class="form-control" rows="2"></textarea>
                     </div>
                     <button type="button" onclick="agregarLinea()" class="btn btn-primary w-100 shadow-sm">
                         <i class="bi bi-plus-circle me-1"></i> Agregar a la Lista
@@ -83,10 +83,10 @@
                 <input type="hidden" name="es_tercero" value="0">
                 <input type="hidden" name="id_detalle" id="hidden_id_detalle" value="{{ $detalle->IdAsientoDetalle }}">
                 
-                <div class="card bg-dark text-white border-secondary shadow">
+                <div class="card border-0 shadow-sm">
                     <div class="card-body p-0">
-                        <table class="table table-dark table-hover mb-0">
-                            <thead class="table-dark">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>Centro de Costo</th>
                                     <th>Nota</th>
@@ -100,7 +100,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="card-footer border-secondary bg-dark">
+                    <div class="card-footer bg-white">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="text-start">
                                 <span class="text-muted">Pendiente: </span>
@@ -132,15 +132,17 @@
 
     window.onload = function() {
         const existentes = @json($distribucionActual ?? []);
-        
+
         if (existentes && existentes.length > 0) {
             lineas = existentes.map(d => {
+
                 const option = document.querySelector(`#select_centro option[value="${d.IdCentroCosto}"]`);
+
                 return {
                     id: d.IdCentroCosto,
                     nombre: option ? option.text : `ID: ${d.IdCentroCosto}`,
                     monto: parseFloat(d.Monto),
-                    nota: d.Nota || "" 
+                    nota: d.Nota ? d.Nota : "" 
                 };
             });
         }
