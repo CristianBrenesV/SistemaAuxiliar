@@ -166,7 +166,7 @@ No se encontraron movimientos
 
 <div class="col-md-4">
 
-<div class="alert alert-success text-center">
+<div class="alert alert-light border text-center">
 <strong>Total Debe</strong><br>
 <span class="fs-5 fw-bold">
 {{ number_format($totalDebe,2) }}
@@ -177,7 +177,7 @@ No se encontraron movimientos
 
 <div class="col-md-4">
 
-<div class="alert alert-danger text-center">
+<div class="alert alert-light border text-center">
 <strong>Total Haber</strong><br>
 <span class="fs-5 fw-bold">
 {{ number_format($totalHaber,2) }}
@@ -188,10 +188,10 @@ No se encontraron movimientos
 
 <div class="col-md-4">
 
-<div class="alert {{ $diferencia == 0 ? 'alert-success' : 'alert-danger' }} text-center">
-<strong>Diferencia</strong><br>
+<div class="alert alert-secondary text-center">
+<strong>Total Movimientos</strong><br>
 <span class="fs-5 fw-bold">
-{{ number_format($diferencia,2) }}
+{{ number_format($totalDebe + $totalHaber,2) }}
 </span>
 </div>
 

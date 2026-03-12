@@ -123,6 +123,16 @@
         </table>
     </div>
 </div>
+
+<div class="mb-2 text-muted small">
+    Mostrando {{ $asientos->firstItem() }} a {{ $asientos->lastItem() }} 
+    de {{ $asientos->total() }} registros
+</div>
+
+<div class="d-flex justify-content-center mt-2">
+    {{ $asientos->links() }}
+</div>
+
 @endsection
 
 @section('scripts')

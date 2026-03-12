@@ -34,7 +34,9 @@ class ProrrateoController extends Controller
             $query->where('IdEstadoAsiento', $request->estado_id);
         }
 
-        $asientos = $query->orderBy('Fecha', 'desc')->get();
+        $asientos = $query->orderBy('Fecha', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('prorrateo.index', compact('asientos', 'periodos', 'idPeriodo'));
     }

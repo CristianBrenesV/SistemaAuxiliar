@@ -54,16 +54,6 @@
                             <i class="bi bi-journal-check"></i> Prorrateo de Asientos
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('prorrateo.costos*') ? 'text-info' : '' }}" href="#">
-                            <i class="bi bi-diagram-3"></i> Historial de Costos
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('prorrateo.terceros*') ? 'text-info' : '' }}" href="#">
-                            <i class="bi bi-person-check"></i> Historial de Terceros
-                        </a>
-                    </li>
 
                     <li class="nav-item mt-3"><span class="text-white h6">Reportes</span></li>
 
