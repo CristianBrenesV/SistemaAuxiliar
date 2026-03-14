@@ -6,7 +6,7 @@
 
 <div class="card shadow">
 
-<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+<div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
 <h5 class="mb-0">Reporte de Movimientos por Tercero</h5>
 </div>
 
@@ -73,7 +73,7 @@ Aprobado
 
 
 <div class="col-md-1 d-flex align-items-end">
-<button class="btn btn-primary btn-sm w-100">
+<button class="btn btn-dark btn-sm w-100">
 Buscar
 </button>
 </div>

@@ -11,7 +11,7 @@
     
     {{-- Info del Asiento --}}
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between">
+        <div class="card-header bg-dark text-white d-flex justify-content-between">
             <span><i class="bi bi-person-badge me-1"></i> Asiento: <strong>{{ $asiento->Consecutivo }}</strong></span>
             <span class="small">Ref: {{ $asiento->Referencia }}</span>
         </div>
@@ -26,7 +26,7 @@
                     </select>
                 </div>
                 <div class="col-md-6 text-end">
-                    <h4 class="mb-0 text-primary fw-bold">
+                    <h4 class="mb-0 text-dark fw-bold">
                         Monto a Distribuir: 
                         <span id="display_monto_objetivo">₡{{ number_format($detalle->Monto, 2) }}</span>
                     </h4>
@@ -66,7 +66,7 @@
                         <textarea id="input_nota" class="form-control" rows="2"></textarea>
                     </div>
 
-                    <button type="button" id="btn_ejecutar_agregado" class="btn btn-success w-100 shadow-sm">
+                    <button type="button" id="btn_ejecutar_agregado" class="btn btn-dark w-100 shadow-sm">
                         <i class="bi bi-plus-circle me-1"></i> Agregar a la Lista
                     </button>
                 </div>
@@ -134,8 +134,8 @@
                 </div>
 
                 <div class="text-end mt-3">
-                    <button type="submit" id="btn_guardar" class="btn btn-success btn-lg px-5 shadow" disabled>
-                        <i class="bi bi-save me-1"></i> Guardar Prorrateo
+                    <button type="submit" id="btn_guardar" class="btn btn-dark btn-lg px-5 shadow" disabled>
+                        <i class="bi bi-save me-1"></i> Guardar Distribucion
                     </button>
                 </div>
 
