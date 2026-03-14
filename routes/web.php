@@ -46,6 +46,42 @@ Route::middleware('web')->group(function () {
     Route::get('/reportes/centros', [ReporteMovimientosController::class, 'reporteCentros'])->name('reportes.centros');
 });
 
+// ================= TERCEROS (AUX5) =================
+Route::middleware('web')->group(function () {
+    Route::get('/terceros', [App\Http\Controllers\TerceroController::class, 'index'])->name('terceros.index');
+    Route::get('/terceros/crear', [App\Http\Controllers\TerceroController::class, 'crear'])->name('terceros.crear');
+    Route::post('/terceros/guardar', [App\Http\Controllers\TerceroController::class, 'guardar'])->name('terceros.guardar');
+    Route::get('/terceros/editar/{id}', [App\Http\Controllers\TerceroController::class, 'editar'])->name('terceros.editar');
+    Route::put('/terceros/actualizar/{id}', [App\Http\Controllers\TerceroController::class, 'actualizar'])->name('terceros.actualizar');
+    Route::delete('/terceros/eliminar/{id}', [App\Http\Controllers\TerceroController::class, 'eliminar'])->name('terceros.eliminar');
+
+    // ================= DIRECCIONES DE TERCEROS (AUX11) =================
+    Route::get('/terceros/{idTercero}/direcciones', [App\Http\Controllers\TerceroDireccionController::class, 'index'])->name('terceros.direcciones.index');
+    Route::get('/terceros/{idTercero}/direcciones/crear', [App\Http\Controllers\TerceroDireccionController::class, 'crear'])->name('terceros.direcciones.crear');
+    Route::post('/terceros/{idTercero}/direcciones/guardar', [App\Http\Controllers\TerceroDireccionController::class, 'guardar'])->name('terceros.direcciones.guardar');
+    Route::get('/terceros/{idTercero}/direcciones/editar/{idDireccion}', [App\Http\Controllers\TerceroDireccionController::class, 'editar'])->name('terceros.direcciones.editar');
+    Route::put('/terceros/{idTercero}/direcciones/actualizar/{idDireccion}', [App\Http\Controllers\TerceroDireccionController::class, 'actualizar'])->name('terceros.direcciones.actualizar');
+    Route::delete('/terceros/{idTercero}/direcciones/eliminar/{idDireccion}', [App\Http\Controllers\TerceroDireccionController::class, 'eliminar'])->name('terceros.direcciones.eliminar');
+
+    // ================= CONTACTOS DE TERCEROS (AUX12) =================
+    Route::get('/terceros/{idTercero}/contactos', [App\Http\Controllers\TerceroContactoController::class, 'index'])->name('terceros.contactos.index');
+    Route::get('/terceros/{idTercero}/contactos/crear', [App\Http\Controllers\TerceroContactoController::class, 'crear'])->name('terceros.contactos.crear');
+    Route::post('/terceros/{idTercero}/contactos/guardar', [App\Http\Controllers\TerceroContactoController::class, 'guardar'])->name('terceros.contactos.guardar');
+    Route::get('/terceros/{idTercero}/contactos/editar/{idContacto}', [App\Http\Controllers\TerceroContactoController::class, 'editar'])->name('terceros.contactos.editar');
+    Route::put('/terceros/{idTercero}/contactos/actualizar/{idContacto}', [App\Http\Controllers\TerceroContactoController::class, 'actualizar'])->name('terceros.contactos.actualizar');
+    Route::delete('/terceros/{idTercero}/contactos/eliminar/{idContacto}', [App\Http\Controllers\TerceroContactoController::class, 'eliminar'])->name('terceros.contactos.eliminar');
+});
+
+// ================= CENTROS DE COSTO (AUX6) =================
+Route::middleware('web')->group(function () {
+    Route::get('/centroscosto', [App\Http\Controllers\CentroCostoController::class, 'index'])->name('centroscosto.index');
+    Route::get('/centroscosto/crear', [App\Http\Controllers\CentroCostoController::class, 'crear'])->name('centroscosto.crear');
+    Route::post('/centroscosto/guardar', [App\Http\Controllers\CentroCostoController::class, 'guardar'])->name('centroscosto.guardar');
+    Route::get('/centroscosto/editar/{id}', [App\Http\Controllers\CentroCostoController::class, 'editar'])->name('centroscosto.editar');
+    Route::put('/centroscosto/actualizar/{id}', [App\Http\Controllers\CentroCostoController::class, 'actualizar'])->name('centroscosto.actualizar');
+    Route::delete('/centroscosto/eliminar/{id}', [App\Http\Controllers\CentroCostoController::class, 'eliminar'])->name('centroscosto.eliminar');
+});
+
 // ================= PÁGINA INICIAL =================
 Route::get('/', function () {
     return redirect()->route('login');
