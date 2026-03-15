@@ -50,8 +50,8 @@
                     <div class="mb-3">
                         <label class="form-label">Monto</label>
                         <div class="input-group">
-                            <span class="form-control">₡</span>
-                            <input type="number" id="input_monto" class="form-control bg-secondary text-white border-0" step="0.01" placeholder="0.00">
+                            <span class="input-group-text">₡</span>
+                            <input type="number" id="input_monto" class="form-control" step="0.01" placeholder="0.00">
                         </div>
                     </div>
                     <div class="mb-3">

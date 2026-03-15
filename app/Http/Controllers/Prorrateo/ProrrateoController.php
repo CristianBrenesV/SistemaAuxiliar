@@ -12,9 +12,19 @@ use App\Models\AsientoDetalleTercero;
 use App\Http\Requests\GuardarProrrateoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\BitacoraService; 
 
 class ProrrateoController extends Controller
 {
+
+    private $bitacoraService;
+
+    public function __construct(BitacoraService $bitacoraService)
+    {
+        $this->bitacoraService = $bitacoraService;
+    }
+
+
     public function index(Request $request)
     {
         $periodos = DB::table('periodocontable')
@@ -38,8 +48,21 @@ class ProrrateoController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $this->bitacoraService->registrar(
+            "El usuario consulta listado de asientos para prorrateo",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "AsientosContables",
+                "Datos" => [
+                    "Periodo" => $idPeriodo,
+                    "EstadoFiltro" => $request->estado_id
+                ]
+            ]
+        );
+
         return view('prorrateo.index', compact('asientos', 'periodos', 'idPeriodo'));
     }
+
 
     public function obtenerDetalles($id)
     {
@@ -75,8 +98,20 @@ class ProrrateoController extends Controller
 
             ->get();
 
+        $this->bitacoraService->registrar(
+            "El usuario consulta detalles del asiento",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "DetalleAsiento",
+                "Datos" => [
+                    "IdAsiento" => $id
+                ]
+            ]
+        );
+
         return response()->json($detalles);
     }
+
 
     public function prorratearCostos($idDetalle)
     {
@@ -90,8 +125,20 @@ class ProrrateoController extends Controller
         
         $distribucionActual = AsientoDetalleCentroCosto::where('IdAsientoDetalle', $idDetalle)->get();
 
+        $this->bitacoraService->registrar(
+            "El usuario abre pantalla de prorrateo de centros de costo",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "ProrrateoCentroCosto",
+                "Datos" => [
+                    "IdDetalleAsiento" => $idDetalle
+                ]
+            ]
+        );
+
         return view('prorrateo.costos', compact('detalle', 'centros', 'distribucionActual'));
     }
+
 
     public function prorratearTerceros($idDetalle)
     {
@@ -120,6 +167,17 @@ class ProrrateoController extends Controller
 
         $asiento = $detalle->asiento;
 
+        $this->bitacoraService->registrar(
+            "El usuario abre pantalla de prorrateo de terceros",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "ProrrateoTerceros",
+                "Datos" => [
+                    "IdDetalleAsiento" => $idDetalle
+                ]
+            ]
+        );
+
         return view('prorrateo.terceros', compact(
             'detalle',
             'terceros',
@@ -129,13 +187,14 @@ class ProrrateoController extends Controller
         ));
     }
 
+
     public function guardarProrrateo(GuardarProrrateoRequest $request)
     {
         try {
+
             DB::beginTransaction();
 
-            $esTercero = $request->input('es_tercero') == "1"; 
-            $usuarioId = session('user_id') ?? 1; 
+            $esTercero = $request->input('es_tercero') == "1";
 
             $total = array_sum(array_column($request->distribucion, 'monto'));
 
@@ -149,9 +208,9 @@ class ProrrateoController extends Controller
             }
 
             if ($esTercero) {
+
                 AsientoDetalleTercero::where('IdAsientoDetalle', $request->id_detalle)->delete();
                 
-
                 foreach ($request->distribucion as $item) {
                     AsientoDetalleTercero::create([
                         'IdAsientoDetalle' => $request->id_detalle,
@@ -161,8 +220,11 @@ class ProrrateoController extends Controller
                         'Nota'             => $item['nota'] ?? null,
                     ]);
                 }
+
                 $accion = "Prorrateo de Terceros realizado";
+
             } else {
+
                 AsientoDetalleCentroCosto::where('IdAsientoDetalle', $request->id_detalle)->delete();
                 
                 foreach ($request->distribucion as $item) {
@@ -174,28 +236,48 @@ class ProrrateoController extends Controller
                         'Nota'             => $item['nota'] ?? null
                     ]);
                 }
+
                 $accion = "Prorrateo de Centros de Costo realizado";
             }
 
-            DB::table('bitacora')->insert([
-                'IdUsuarioAccion'   => $usuarioId,
-                'FechaBitacora'     => now(),
-                'DescripcionAccion' => $accion . " - Línea #{$request->id_detalle}",
-                'ListadoAccion'     => json_encode([
-                    'modulo' => 'Prorrateo',
-                    'id_detalle_asiento' => $request->id_detalle,
-                    'monto_total' => array_sum(array_column($request->distribucion, 'monto')),
-                    'distribucion' => $request->distribucion,
-                    'ip' => request()->ip()
-                ])
-            ]);
+            $this->bitacoraService->registrar(
+                $accion,
+                [
+                    "TipoAccion" => "ACTUALIZAR",
+                    "Elemento" => "ProrrateoDetalleAsiento",
+                    "Datos" => [
+                        "IdDetalleAsiento" => $request->id_detalle,
+                        "MontoTotal" => $total,
+                        "Distribucion" => $request->distribucion
+                    ]
+                ]
+            );
+
 
             DB::commit();
-            return redirect()->route('asientos.index')->with('success', 'Prorrateo guardado y registrado con éxito.');
+
+            return redirect()->route('asientos.index')
+            ->with('success', 'Prorrateo guardado correctamente.');
 
         } catch (\Exception $e) {
+
             DB::rollBack();
-            return back()->withErrors(['error' => 'Error en el guardado: ' . $e->getMessage()]);
+
+            $this->bitacoraService->registrar(
+                "Error al guardar prorrateo",
+                [
+                    "TipoAccion" => "ERROR",
+                    "Elemento" => "Prorrateo",
+                    "Datos" => [
+                        "Mensaje" => $e->getMessage(),
+                        "Linea" => $e->getLine()
+                    ]
+                ]
+            );
+
+            return back()->withErrors([
+                'error' => 'Error en el guardado: ' . $e->getMessage()
+            ]);
         }
     }
-}   
+}

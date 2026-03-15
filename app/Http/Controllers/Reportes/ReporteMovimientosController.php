@@ -5,9 +5,18 @@ namespace App\Http\Controllers\Reportes;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\BitacoraService;
 
 class ReporteMovimientosController extends Controller
 {
+
+    private $bitacoraService;
+
+    public function __construct(BitacoraService $bitacoraService)
+    {
+        $this->bitacoraService = $bitacoraService;
+    }
+
 
     public function reporteTerceros(Request $request)
     {
@@ -58,6 +67,20 @@ class ReporteMovimientosController extends Controller
         )
         ->orderBy('a.Fecha','desc')
         ->paginate(10);
+
+        $this->bitacoraService->registrar(
+            "El usuario consulta reporte de movimientos por terceros",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "ReporteMovimientosTerceros",
+                "Datos" => [
+                    "tercero_id" => $request->tercero_id,
+                    "fecha_inicio" => $request->fecha_inicio,
+                    "fecha_fin" => $request->fecha_fin,
+                    "estado_id" => $request->estado_id
+                ]
+            ]
+        );
 
         return view('reportes.terceros',compact(
             'movimientos',
@@ -119,6 +142,20 @@ class ReporteMovimientosController extends Controller
         )
         ->orderBy('a.Fecha','desc')
         ->paginate(10);
+
+        $this->bitacoraService->registrar(
+            "El usuario consulta reporte de movimientos por centros de costo",
+            [
+                "TipoAccion" => "CONSULTAR",
+                "Elemento" => "ReporteMovimientosCentrosCosto",
+                "Datos" => [
+                    "centro_id" => $request->centro_id,
+                    "fecha_inicio" => $request->fecha_inicio,
+                    "fecha_fin" => $request->fecha_fin,
+                    "estado_id" => $request->estado_id
+                ]
+            ]
+        );
 
         return view('reportes.centros',compact(
             'movimientos',
