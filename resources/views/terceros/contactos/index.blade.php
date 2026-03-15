@@ -123,16 +123,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var modalEliminar = document.getElementById('modalEliminar');
-    modalEliminar.addEventListener('show.bs.modal', function(event) {
-        var button = event.relatedTarget;
-        var contactoId = button.getAttribute('data-id');
-        var contactoNombre = button.getAttribute('data-nombre');
-        
-        document.getElementById('nombreContacto').textContent = contactoNombre;
-        
-        var form = document.getElementById('formEliminar');
-        form.action = '{{ route("terceros.contactos.eliminar", [$tercero->IdTercero, ":id"]) }}'.replace(':id', contactoId);
-    });
+    if (modalEliminar) {
+        modalEliminar.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var contactoId = button.getAttribute('data-id');
+            var contactoNombre = button.getAttribute('data-nombre');
+            
+            document.getElementById('nombreContacto').textContent = contactoNombre;
+            
+            var form = document.getElementById('formEliminar');
+            // Construir la URL manualmente para evitar problemas
+            var url = '/terceros/{{ $tercero->IdTercero }}/contactos/eliminar/' + contactoId;
+            form.action = url;
+            
+            // Verificar en consola (opcional, para debugging)
+            console.log('URL de eliminación:', url);
+        });
+    }
 });
 </script>
 @endsection
