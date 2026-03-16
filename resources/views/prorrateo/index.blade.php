@@ -59,7 +59,7 @@
             <tbody>
                 @forelse ($asientos as $a)
                 <tr>
-                    <td class="fw-bold text-primary">{{ $a->Consecutivo }}</td>
+                    <td class="fw-bold text-dark">{{ $a->Consecutivo }}</td>
                     <td>{{ \Carbon\Carbon::parse($a->Fecha)->format('d/m/Y') }}</td>
                     <td class="text-truncate" style="max-width: 300px;">{{ $a->Referencia }}</td>
                     <td>
@@ -74,16 +74,16 @@
                             $puedeProrratear = in_array($a->IdEstadoAsiento, [1, 2]);
                         @endphp
                         <span class="badge {{ $badgeClass }} px-3">
-                            @if($a->IdEstadoAsiento == 1) Borrador 
-                            @elseif($a->IdEstadoAsiento == 2) Pendiente 
-                            @elseif($a->IdEstadoAsiento == 3) Aprobado 
+                            @if($a->IdEstadoAsiento == 1) Borrador
+                            @elseif($a->IdEstadoAsiento == 2) Pendiente
+                            @elseif($a->IdEstadoAsiento == 3) Aprobado
                             @else Estado {{ $a->IdEstadoAsiento }} @endif
                         </span>
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-outline-primary shadow-sm" 
+                        <button class="btn btn-sm btn-outline-secondary shadow-sm"
                                 onclick="cargarDetalle({{ $a->IdAsiento }}, {{ $puedeProrratear ? 'true' : 'false' }})"
-                                data-bs-toggle="collapse" 
+                                data-bs-toggle="collapse"
                                 data-bs-target="#det-{{ $a->IdAsiento }}">
                             <i class="bi bi-eye"></i> Ver Detalle
                         </button>
@@ -124,14 +124,10 @@
     </div>
 </div>
 
-<div class="mb-2 text-muted small">
-    Mostrando {{ $asientos->firstItem() }} a {{ $asientos->lastItem() }} 
-    de {{ $asientos->total() }} registros
-</div>
+<nav aria-label="Paginación de asientos" class="d-flex justify-content-center mt-2">
+    {{ $asientos->links('pagination::bootstrap-5') }}
+</nav>
 
-<div class="d-flex justify-content-center mt-2">
-    {{ $asientos->links() }}
-</div>
 
 @endsection
 
@@ -147,9 +143,9 @@
 
             let html = "";
             lineas.forEach(linea => {
-                const badgeColor = linea.TipoMovimiento === 'D' ? 'text-primary' : 'text-info';
+                const badgeColor = linea.TipoMovimiento === 'D' ? 'text-dark' : 'text-info';
                 const montoFormatted = new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC' }).format(linea.Monto);
-                
+
                 let botones = '<span class="text-muted small">N/A</span>';
 
                 if (puedeProrratear) {
@@ -160,14 +156,14 @@
                     botones = `
                         <div class="btn-group btn-group-xs shadow-sm">
 
-                            <a href="/prorrateo/costos/${linea.IdAsientoDetalle}" 
+                            <a href="/prorrateo/costos/${linea.IdAsientoDetalle}"
                             class="btn btn-outline-primary py-0"
                             title="Centros de Costo">
 
                             <i class="bi ${iconCC}"></i> CC
                             </a>
 
-                            <a href="/prorrateo/terceros/${linea.IdAsientoDetalle}" 
+                            <a href="/prorrateo/terceros/${linea.IdAsientoDetalle}"
                             class="btn btn-outline-success py-0"
                             title="Asignar Terceros">
 

@@ -41,7 +41,7 @@
 
                     <li class="nav-item mt-3"><span class="text-white h6">Centros de Costo</span></li>
                     <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('centroscosto.*') ? 'fw-bold bg-primary rounded' : '' }}" 
+                        <a class="nav-link text-white {{ request()->routeIs('centroscosto.*')}}"
                         href="{{ route('centroscosto.index') }}">
                             <i class="bi bi-grid"></i> Gestión Centros de Costo
                         </a>
@@ -49,20 +49,20 @@
 
                     <li class="nav-item mt-3"><span class="text-white h6">Terceros</span></li>
                     <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('terceros.*') ? 'fw-bold bg-primary rounded' : '' }}" 
+                        <a class="nav-link text-white {{ request()->routeIs('terceros.*')}}"
                         href="{{ route('terceros.index') }}">
                             <i class="bi bi-people"></i> Gestión Terceros
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('terceros.direcciones.*') ? 'fw-bold bg-primary rounded' : '' }}" 
-                        href="{{ route('terceros.direcciones.index', 1) }}" 
+                        <a class="nav-link text-white {{ request()->routeIs('terceros.direcciones.*')}}"
+                        href="{{ route('terceros.direcciones.index', 1) }}"
                         onclick="return confirm('Seleccione un tercero desde la lista de terceros para ver sus direcciones.')">
                             <i class="bi bi-geo-alt"></i> Direcciones
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('terceros.contactos.*') ? 'fw-bold bg-primary rounded' : '' }}" 
+                        <a class="nav-link text-white {{ request()->routeIs('terceros.contactos.*') }}"
                         href="{{ route('terceros.contactos.index', 1) }}"
                         onclick="return confirm('Seleccione un tercero desde la lista de terceros para ver sus contactos.')">
                             <i class="bi bi-person-lines-fill"></i> Contactos
@@ -71,7 +71,7 @@
 
                     <li class="nav-item mt-3"><span class="text-white h6">Asignaciones / Prorrateo</span></li>
                     <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('asientos.index') ? 'fw-bold bg-primary rounded' : '' }}" 
+                        <a class="nav-link text-white {{ request()->routeIs('asientos.index')}}"
                         href="{{ route('asientos.index') }}">
                             <i class="bi bi-journal-check"></i> Prorrateo de Asientos
                         </a>
@@ -80,14 +80,14 @@
                     <li class="nav-item mt-3"><span class="text-white h6">Reportes</span></li>
 
                     <li class="nav-item">
-                    <a class="nav-link text-white {{ request()->routeIs('reportes.centros') ? 'fw-bold bg-primary rounded' : '' }}"
+                    <a class="nav-link text-white {{ request()->routeIs('reportes.centros') }}"
                     href="{{ route('reportes.centros') }}">
                     <i class="bi bi-diagram-3"></i> Movimientos por Centro de Costo
                     </a>
                     </li>
 
                     <li class="nav-item">
-                    <a class="nav-link text-white {{ request()->routeIs('reportes.terceros') ? 'fw-bold bg-primary rounded' : '' }}"
+                    <a class="nav-link text-white {{ request()->routeIs('reportes.terceros')}}"
                     href="{{ route('reportes.terceros') }}">
                     <i class="bi bi-person-lines-fill"></i> Movimientos por Tercero
                     </a>

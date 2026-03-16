@@ -156,11 +156,9 @@ No se encontraron movimientos
 </div>
 
 
-<div class="d-flex justify-content-center mt-3">
-
-{{ $movimientos->links() }}
-
-</div>
+<nav aria-label="Paginación de movimientos" class="d-flex justify-content-center mt-3">
+    {{ $movimientos->links('pagination::bootstrap-5') }}
+</nav>
 
 <div class="row mt-4">
 
