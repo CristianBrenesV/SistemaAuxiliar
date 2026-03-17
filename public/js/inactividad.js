@@ -17,11 +17,6 @@
             // Mostrar modal de sesión expirada
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
-
-            // Redirigir automáticamente después de 3 segundos
-            setTimeout(() => {
-                window.location.href = "/login";
-            }, 3000);
         });
     }
 
