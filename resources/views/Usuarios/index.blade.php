@@ -99,7 +99,7 @@
 {{-- Paginación --}}
 <nav aria-label="Paginación de usuarios" class="mt-4">
     {{ $usuarios->links('pagination::bootstrap-5') }}
-</nav>
+</nav>s
 
 {{-- Mensajes --}}
 @if(session('mensaje'))
