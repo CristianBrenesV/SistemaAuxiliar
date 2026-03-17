@@ -36,9 +36,14 @@
                 <div class="w-80 mx-auto" style="height: 3px; background-color: #e6e6e6; margin-bottom: 5px"></div>
 
                 <ul class="nav flex-column">
-                    <li class="nav-item mt-3"><span class="text-white h6">Usuarios</span></li>
-                    <a class="nav-link text-white" href="{{ route('usuarios.index') }}"><i class="bi bi-people-fill"></i> Gestión Usuarios</a>
-
+                    {{--
+                    <li class="nav-item mt-3">
+                        <span class="text-white h6">Usuarios</span>
+                    </li>
+                    <a class="nav-link text-white" href="{{ route('usuarios.index') }}">
+                        <i class="bi bi-people-fill"></i> Gestión Usuarios
+                    </a>
+                    --}}
                     <li class="nav-item mt-3"><span class="text-white h6">Centros de Costo</span></li>
                     <li class="nav-item">
                         <a class="nav-link text-white {{ request()->routeIs('centroscosto.*')}}"
@@ -52,20 +57,6 @@
                         <a class="nav-link text-white {{ request()->routeIs('terceros.*')}}"
                         href="{{ route('terceros.index') }}">
                             <i class="bi bi-people"></i> Gestión Terceros
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('terceros.direcciones.*')}}"
-                        href="{{ route('terceros.direcciones.index', 1) }}"
-                        onclick="return confirm('Seleccione un tercero desde la lista de terceros para ver sus direcciones.')">
-                            <i class="bi bi-geo-alt"></i> Direcciones
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white {{ request()->routeIs('terceros.contactos.*') }}"
-                        href="{{ route('terceros.contactos.index', 1) }}"
-                        onclick="return confirm('Seleccione un tercero desde la lista de terceros para ver sus contactos.')">
-                            <i class="bi bi-person-lines-fill"></i> Contactos
                         </a>
                     </li>
 
